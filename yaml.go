@@ -350,8 +350,6 @@ func getStructInfo(st reflect.Type) (*structInfo, error) {
 					inline = true
 				case "skip":
 					info.Skip = true
-				case "matchcase":
-					info.MatchCase = true
 				default:
 					return nil, fmt.Errorf("Unsupported flag %q in tag %q of type %s", flag, tag, st)
 				}
@@ -398,11 +396,11 @@ func getStructInfo(st reflect.Type) (*structInfo, error) {
 		if tag != "" {
 			info.Key = tag
 		} else {
-			if info.MatchCase {
-				info.Key = field.Name
-			} else {
-				info.Key = strings.ToLower(field.Name)
-			}
+			// if info.MatchCase {
+			info.Key = field.Name
+			// } else {
+			// 	info.Key = strings.ToLower(field.Name)
+			// }
 		}
 
 		if _, found = fieldsMap[info.Key]; found {
