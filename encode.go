@@ -213,6 +213,9 @@ func (e *encoder) structv(tag string, in reflect.Value) {
 	e.mappingv(tag, func() {
 		for _, info := range sinfo.FieldsList {
 			var value reflect.Value
+			if info.Skip {
+				continue
+			}
 			if info.Inline == nil {
 				value = in.Field(info.Num)
 			} else {

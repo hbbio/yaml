@@ -296,9 +296,11 @@ type fieldInfo struct {
 	Num       int
 	OmitEmpty bool
 	Flow      bool
-	// Id holds the unique field identifier, so we can cheaply
+	MatchCase bool // try to match original go case
+	Skip      bool // entirely skip field
+	// ID holds the unique field identifier, so we can cheaply
 	// check for field duplicates without maintaining an extra map.
-	Id int
+	ID int
 
 	// Inline holds the field index if the field is part of an inlined struct.
 	Inline []int
@@ -346,8 +348,12 @@ func getStructInfo(st reflect.Type) (*structInfo, error) {
 					info.Flow = true
 				case "inline":
 					inline = true
+				case "skip":
+					info.Skip = true
+				case "matchcase":
+					info.MatchCase = true
 				default:
-					return nil, errors.New(fmt.Sprintf("Unsupported flag %q in tag %q of type %s", flag, tag, st))
+					return nil, fmt.Errorf("Unsupported flag %q in tag %q of type %s", flag, tag, st)
 				}
 			}
 			tag = fields[0]
@@ -378,7 +384,7 @@ func getStructInfo(st reflect.Type) (*structInfo, error) {
 					} else {
 						finfo.Inline = append([]int{i}, finfo.Inline...)
 					}
-					finfo.Id = len(fieldsList)
+					finfo.ID = len(fieldsList)
 					fieldsMap[finfo.Key] = finfo
 					fieldsList = append(fieldsList, finfo)
 				}
@@ -392,7 +398,11 @@ func getStructInfo(st reflect.Type) (*structInfo, error) {
 		if tag != "" {
 			info.Key = tag
 		} else {
-			info.Key = strings.ToLower(field.Name)
+			if info.MatchCase {
+				info.Key = field.Name
+			} else {
+				info.Key = strings.ToLower(field.Name)
+			}
 		}
 
 		if _, found = fieldsMap[info.Key]; found {
@@ -400,7 +410,7 @@ func getStructInfo(st reflect.Type) (*structInfo, error) {
 			return nil, errors.New(msg)
 		}
 
-		info.Id = len(fieldsList)
+		info.ID = len(fieldsList)
 		fieldsList = append(fieldsList, info)
 		fieldsMap[info.Key] = info
 	}

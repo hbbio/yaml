@@ -941,10 +941,9 @@ func yaml_parser_parse_flow_mapping_key(parser *yaml_parser_t, event *yaml_event
 				token.typ != yaml_FLOW_MAPPING_END_TOKEN {
 				parser.states = append(parser.states, yaml_PARSE_FLOW_MAPPING_VALUE_STATE)
 				return yaml_parser_parse_node(parser, event, false, false)
-			} else {
-				parser.state = yaml_PARSE_FLOW_MAPPING_VALUE_STATE
-				return yaml_parser_process_empty_scalar(parser, event, token.start_mark)
-			}
+			} // else
+			parser.state = yaml_PARSE_FLOW_MAPPING_VALUE_STATE
+			return yaml_parser_process_empty_scalar(parser, event, token.start_mark)
 		} else if token.typ != yaml_FLOW_MAPPING_END_TOKEN {
 			parser.states = append(parser.states, yaml_PARSE_FLOW_MAPPING_EMPTY_VALUE_STATE)
 			return yaml_parser_parse_node(parser, event, false, false)
